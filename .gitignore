@@ -1,0 +1,4 @@
+/data
+/cpp_wrappers
+*pyc
+settings.json
