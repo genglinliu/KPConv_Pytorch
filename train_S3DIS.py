@@ -281,7 +281,7 @@ if __name__ == '__main__':
     t1 = time.time()
     net = KPFCNN(config, training_dataset.label_values, training_dataset.ignored_labels)
 
-    debug = False
+    debug = True
     if debug:
         print('\n*************************************\n')
         print(net)

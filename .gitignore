@@ -1,4 +1,6 @@
 /data
 /cpp_wrappers
+/results
+
 *pyc
 settings.json

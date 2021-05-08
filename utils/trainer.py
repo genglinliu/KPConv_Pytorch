@@ -43,6 +43,8 @@ from sklearn.neighbors import KDTree
 
 from models.blocks import KPConv
 
+from tqdm import tqdm
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #
@@ -164,7 +166,7 @@ class ModelTrainer:
                 remove(PID_file)
 
             self.step = 0
-            for batch in training_loader:
+            for batch in tqdm(training_loader):
 
                 # Check kill signal (running_PID.txt deleted)
                 if config.saving and not exists(PID_file):
