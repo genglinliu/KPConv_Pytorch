@@ -707,9 +707,9 @@ def experiment_name_1():
     logs = np.sort([join(res_path, l) for l in listdir(res_path) if start <= l <= end])
 
     # Give names to the logs (for plot legends)
-    logs_names = ['name_log_1',
-                  'name_log_2',
-                  'name_log_3']
+    logs_names = ['in_radius=0.5',
+                  'in_radius=0.8',
+                  'in_radius=1.0']
 
     # safe check log names
     logs_names = np.array(logs_names[:len(logs)])
