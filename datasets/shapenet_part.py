@@ -107,12 +107,12 @@ class ShapeNetPartDataset(PointCloudDataset):
         }
 
         # Dataset folder
-        assert os.getenv('SHAPENETPART_PATH'), \
-            "Please set up the environment variable SHAPENETPART_PATH in a .env file!"
-        assert ctg_path_dict[train_category], \
-            "The category contains too few samples to perform the task"
+        # assert os.getenv('SHAPENETPART_PATH'), \
+        #     "Please set up the environment variable SHAPENETPART_PATH in a .env file!"
+        # assert ctg_path_dict[train_category], \
+        #     "The category contains too few samples to perform the task"
         # dataset_path = os.environ['SHAPENETPART_PATH']
-        dataset_path = 'C:\\Users\\Genglin Liu\\Documents\\GitHub\\KPConv_Pytorch\\data\\shapenetcore_partanno_segmentation_benchmark_v0'
+        dataset_path = '/home/genglinliu/cs674_kpconv/data/shapenetcore_partanno_segmentation_benchmark_v0'
         self.path = os.path.join(dataset_path, ctg_path_dict[train_category])
 
         # Dict from labels to names, where all names is just the index
