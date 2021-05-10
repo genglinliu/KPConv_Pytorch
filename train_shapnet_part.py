@@ -62,7 +62,8 @@ class ShapeNetPartConfig(Config):
     dataset_task = ''
 
     # Number of CPU threads for the input pipeline
-    input_threads = 32
+    # input_threads = multiprocessing.cpu_count()
+    input_threads = 10
 
     #########################
     # Architecture definition
@@ -99,7 +100,7 @@ class ShapeNetPartConfig(Config):
     ###################
 
     # Radius of the input sphere
-    in_radius = 0.8
+    in_radius = 5e-2
 
     # Number of kernel points
     num_kernel_points = 15

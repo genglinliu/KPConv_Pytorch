@@ -114,7 +114,7 @@ class ModelTrainer:
         # Path of the result folder
         if config.saving:
             if config.saving_path is None:
-                config.saving_path = time.strftime('results/Log_%Y-%m-%d_%H-%M-%S', time.gmtime())
+                config.saving_path = time.strftime('results/Log_%Y-%m-%d_%H-%M-%S', time.localtime())
             if not exists(config.saving_path):
                 makedirs(config.saving_path)
             config.save()
@@ -166,7 +166,7 @@ class ModelTrainer:
                 remove(PID_file)
 
             self.step = 0
-            for batch in tqdm(training_loader):
+            for batch in training_loader:
 
                 # Check kill signal (running_PID.txt deleted)
                 if config.saving and not exists(PID_file):
@@ -427,9 +427,9 @@ class ModelTrainer:
         val_smooth = 0.95
         softmax = torch.nn.Softmax(1)
 
-        # Do not validate if dataset has no validation cloud
-        if val_loader.dataset.validation_split not in val_loader.dataset.all_splits:
-            return
+        # # Do not validate if dataset has no validation cloud
+        # if val_loader.dataset.validation_split not in val_loader.dataset.all_splits:
+        #     return
 
         # Number of classes including ignored labels
         nc_tot = val_loader.dataset.num_classes
@@ -580,19 +580,19 @@ class ModelTrainer:
                 with open(test_file, "w") as text_file:
                     text_file.write(line)
 
-            # Save potentials
-            pot_path = join(config.saving_path, 'potentials')
-            if not exists(pot_path):
-                makedirs(pot_path)
-            files = val_loader.dataset.files
-            for i, file_path in enumerate(files):
-                pot_points = np.array(val_loader.dataset.pot_trees[i].data, copy=False)
-                cloud_name = file_path.split('/')[-1]
-                pot_name = join(pot_path, cloud_name)
-                pots = val_loader.dataset.potentials[i].numpy().astype(np.float32)
-                write_ply(pot_name,
-                          [pot_points.astype(np.float32), pots],
-                          ['x', 'y', 'z', 'pots'])
+            # # Save potentials
+            # pot_path = join(config.saving_path, 'potentials')
+            # if not exists(pot_path):
+            #     makedirs(pot_path)
+            # files = val_loader.dataset.files
+            # for i, file_path in enumerate(files):
+            #     pot_points = np.array(val_loader.dataset.pot_trees[i].data, copy=False)
+            #     cloud_name = file_path.split('/')[-1]
+            #     pot_name = join(pot_path, cloud_name)
+            #     pots = val_loader.dataset.potentials[i].numpy().astype(np.float32)
+            #     write_ply(pot_name,
+            #               [pot_points.astype(np.float32), pots],
+            #               ['x', 'y', 'z', 'pots'])
 
         t6 = time.time()
 

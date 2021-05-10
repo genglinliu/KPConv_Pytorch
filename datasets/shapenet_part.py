@@ -111,7 +111,7 @@ class ShapeNetPartDataset(PointCloudDataset):
         #     "Please set up the environment variable SHAPENETPART_PATH in a .env file!"
         # assert ctg_path_dict[train_category], \
         #     "The category contains too few samples to perform the task"
-        # dataset_path = os.environ['SHAPENETPART_PATH']
+        # dataset_path = os.environ['SHAPENETPART_PATH']        
         dataset_path = '/home/genglinliu/cs674_kpconv/data/shapenetcore_partanno_segmentation_benchmark_v0'
         self.path = os.path.join(dataset_path, ctg_path_dict[train_category])
 
@@ -160,7 +160,12 @@ class ShapeNetPartDataset(PointCloudDataset):
 
         # List of training files
         self.all_splits = np.arange(len(files))
+
+        # Make sure that training set and validation set are disjoint
+        np.random.seed(666)
         np.random.shuffle(self.all_splits)
+        np.random.seed(None)
+
         train_idx, self.validation_split = np.split(self.all_splits, [len(self.all_splits) * 8 // 10])
 
         if self.set == 'training':
