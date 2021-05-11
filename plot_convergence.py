@@ -40,7 +40,6 @@ from utils.ply import read_ply
 from datasets.ModelNet40 import ModelNet40Dataset
 from datasets.S3DIS import S3DISDataset
 # from datasets.SemanticKitti import SemanticKittiDataset
-
 # ----------------------------------------------------------------------------------------------------------------------
 #
 #           Utility functions
@@ -50,14 +49,12 @@ from datasets.S3DIS import S3DISDataset
 
 def running_mean(signal, n, axis=0, stride=1):
     signal = np.array(signal)
-    torch_conv = torch.nn.Conv1d(1, 1, kernel_size=2 * n + 1, stride=stride,
-                                 bias=False)
+    torch_conv = torch.nn.Conv1d(1, 1, kernel_size=2*n+1, stride=stride, bias=False)
     torch_conv.weight.requires_grad_(False)
     torch_conv.weight *= 0
-    torch_conv.weight += 1 / (2 * n + 1)
+    torch_conv.weight += 1 / (2*n+1)
     if signal.ndim == 1:
-        torch_signal = torch.from_numpy(
-            signal.reshape([1, 1, -1]).astype(np.float32))
+        torch_signal = torch.from_numpy(signal.reshape([1, 1, -1]).astype(np.float32))
         return torch_conv(torch_signal).squeeze().numpy()
 
     elif signal.ndim == 2:
@@ -65,15 +62,13 @@ def running_mean(signal, n, axis=0, stride=1):
         smoothed = np.empty(signal.shape)
         if axis == 0:
             for i, sig in enumerate(signal):
-                sig_sum = np.convolve(sig, np.ones((2 * n + 1,)), mode='same')
-                sig_num = np.convolve(sig * 0 + 1, np.ones((2 * n + 1,)),
-                                      mode='same')
+                sig_sum = np.convolve(sig, np.ones((2*n+1,)), mode='same')
+                sig_num = np.convolve(sig*0+1, np.ones((2*n+1,)), mode='same')
                 smoothed[i, :] = sig_sum / sig_num
         elif axis == 1:
             for i, sig in enumerate(signal.T):
-                sig_sum = np.convolve(sig, np.ones((2 * n + 1,)), mode='same')
-                sig_num = np.convolve(sig * 0 + 1, np.ones((2 * n + 1,)),
-                                      mode='same')
+                sig_sum = np.convolve(sig, np.ones((2*n+1,)), mode='same')
+                sig_num = np.convolve(sig*0+1, np.ones((2*n+1,)), mode='same')
                 smoothed[:, i] = sig_sum / sig_num
         else:
             print('wrong axis')
@@ -85,6 +80,7 @@ def running_mean(signal, n, axis=0, stride=1):
 
 
 def IoU_class_metrics(all_IoUs, smooth_n):
+
     # Get mean IoU per class for consecutive epochs to directly get a mean without further smoothing
     smoothed_IoUs = []
     for epoch in range(len(all_IoUs)):
@@ -98,6 +94,7 @@ def IoU_class_metrics(all_IoUs, smooth_n):
 
 
 def load_confusions(filename, n_class):
+
     with open(filename, 'r') as f:
         lines = f.readlines()
 
@@ -110,6 +107,7 @@ def load_confusions(filename, n_class):
 
 
 def load_training_results(path):
+
     filename = join(path, 'training.txt')
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -136,29 +134,26 @@ def load_training_results(path):
 
 
 def load_single_IoU(filename, n_parts):
+
     with open(filename, 'r') as f:
         lines = f.readlines()
 
     # Load all IoUs
     all_IoUs = []
     for i, line in enumerate(lines):
-        all_IoUs += [
-            np.reshape([float(IoU) for IoU in line.split()], [-1, n_parts])]
+        all_IoUs += [np.reshape([float(IoU) for IoU in line.split()], [-1, n_parts])]
     return all_IoUs
 
 
 def load_snap_clouds(path, dataset, only_last=False):
-    cloud_folders = np.array(
-        [join(path, f.decode()) for f in listdir(path) if
-         f.startswith(b'val_preds')])
+
+    cloud_folders = np.array([join(path, f) for f in listdir(path) if f.startswith('val_preds')])
     cloud_epochs = np.array([int(f.split('_')[-1]) for f in cloud_folders])
     epoch_order = np.argsort(cloud_epochs)
     cloud_epochs = cloud_epochs[epoch_order]
     cloud_folders = cloud_folders[epoch_order]
 
-    Confs = np.zeros(
-        (len(cloud_epochs), dataset.num_classes, dataset.num_classes),
-        dtype=np.int32)
+    Confs = np.zeros((len(cloud_epochs), dataset.num_classes, dataset.num_classes), dtype=np.int32)
     for c_i, cloud_folder in enumerate(cloud_folders):
         if only_last and c_i < len(cloud_epochs) - 1:
             continue
@@ -170,21 +165,19 @@ def load_snap_clouds(path, dataset, only_last=False):
 
         else:
             for f in listdir(cloud_folder):
-                if f.endswith(b'.ply') and not f.endswith(b'sub.ply'):
-                    data = read_ply(join(cloud_folder, f.decode()))
+                if f.endswith('.ply') and not f.endswith('sub.ply'):
+                    data = read_ply(join(cloud_folder, f))
                     labels = data['class']
                     preds = data['preds']
-                    Confs[c_i] += fast_confusion(labels, preds,
-                                                 dataset.label_values).astype(
-                        np.int32)
+                    Confs[c_i] += fast_confusion(labels, preds, dataset.label_values).astype(np.int32)
 
             np.savetxt(conf_file, Confs[c_i], '%12d')
 
         # Erase ply to save disk memory
         if c_i < len(cloud_folders) - 1:
             for f in listdir(cloud_folder):
-                if f.endswith(b'.ply'):
-                    remove(join(cloud_folder, f.decode()))
+                if f.endswith('.ply'):
+                    remove(join(cloud_folder, f))
 
     # Remove ignored labels from confusions
     for l_ind, label_value in reversed(list(enumerate(dataset.label_values))):
@@ -203,6 +196,7 @@ def load_snap_clouds(path, dataset, only_last=False):
 
 
 def compare_trainings(list_of_paths, list_of_labels=None):
+
     # Parameters
     # **********
 
@@ -226,8 +220,7 @@ def compare_trainings(list_of_paths, list_of_labels=None):
 
         print(path)
 
-        if (b'val_IoUs.txt' in [f for f in listdir(path)]) or (
-                b'val_confs.txt' in [f for f in listdir(path)]):
+        if ('val_IoUs.txt' in [f for f in listdir(path)]) or ('val_confs.txt' in [f for f in listdir(path)]):
             config = Config()
             config.load(path)
         else:
@@ -256,8 +249,7 @@ def compare_trainings(list_of_paths, list_of_labels=None):
 
         # Learning rate
         if plot_lr:
-            lr_decay_v = np.array(
-                [lr_d for ep, lr_d in config.lr_decays.items()])
+            lr_decay_v = np.array([lr_d for ep, lr_d in config.lr_decays.items()])
             lr_decay_e = np.array([ep for ep, lr_d in config.lr_decays.items()])
             max_e = max(np.max(all_epochs[-1]) + 1, np.max(lr_decay_e) + 1)
             lr_decays = np.ones(int(np.ceil(max_e)), dtype=np.float32)
@@ -268,6 +260,7 @@ def compare_trainings(list_of_paths, list_of_labels=None):
 
     # Plots learning rate
     # *******************
+
 
     if plot_lr:
         # Figure
@@ -316,8 +309,7 @@ def compare_trainings(list_of_paths, list_of_labels=None):
     # Figure
     fig = plt.figure('time')
     for i, label in enumerate(list_of_labels):
-        plt.plot(all_epochs[i], np.array(all_times[i]) / 3600, linewidth=1,
-                 label=label)
+        plt.plot(all_epochs[i], np.array(all_times[i]) / 3600, linewidth=1, label=label)
 
     # Set names for axes
     plt.xlabel('epochs')
@@ -337,6 +329,7 @@ def compare_trainings(list_of_paths, list_of_labels=None):
 
 
 def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
+
     # Parameters
     # **********
 
@@ -358,15 +351,14 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
     config = Config()
     config.load(list_of_paths[0])
 
-    class_list = [dataset.label_to_names[label] for label in
-                  dataset.label_values
+    class_list = [dataset.label_to_names[label] for label in dataset.label_values
                   if label not in dataset.ignored_labels]
 
     s = '{:^10}|'.format('mean')
     for c in class_list:
         s += '{:^10}'.format(c)
     print(s)
-    print(10 * '-' + '|' + 10 * config.num_classes * '-')
+    print(10*'-' + '|' + 10*config.num_classes*'-')
     for path in list_of_paths:
 
         # Get validation IoUs
@@ -381,9 +373,9 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
         all_mIoUs += [mIoUs]
         all_class_IoUs += [class_IoUs]
 
-        s = '{:^10.1f}|'.format(100 * mIoUs[-1])
+        s = '{:^10.1f}|'.format(100*mIoUs[-1])
         for IoU in class_IoUs[-1]:
-            s += '{:^10.1f}'.format(100 * IoU)
+            s += '{:^10.1f}'.format(100*IoU)
         print(s)
 
         # Get optional full validation on clouds
@@ -391,12 +383,12 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
         all_snap_epochs += [snap_epochs]
         all_snap_IoUs += [snap_IoUs]
 
-    print(10 * '-' + '|' + 10 * config.num_classes * '-')
+    print(10*'-' + '|' + 10*config.num_classes*'-')
     for snap_IoUs in all_snap_IoUs:
         if len(snap_IoUs) > 0:
-            s = '{:^10.1f}|'.format(100 * np.mean(snap_IoUs[-1]))
+            s = '{:^10.1f}|'.format(100*np.mean(snap_IoUs[-1]))
             for IoU in snap_IoUs[-1]:
-                s += '{:^10.1f}'.format(100 * IoU)
+                s += '{:^10.1f}'.format(100*IoU)
         else:
             s = '{:^10s}'.format('-')
             for _ in range(config.num_classes):
@@ -409,15 +401,13 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
     # Figure
     fig = plt.figure('mIoUs')
     for i, name in enumerate(list_of_names):
-        p = plt.plot(all_pred_epochs[i], all_mIoUs[i], '--', linewidth=1,
-                     label=name)
-        plt.plot(all_snap_epochs[i], np.mean(all_snap_IoUs[i], axis=1),
-                 linewidth=1, color=p[-1].get_color())
+        p = plt.plot(all_pred_epochs[i], all_mIoUs[i], '--', linewidth=1, label=name)
+        plt.plot(all_snap_epochs[i], np.mean(all_snap_IoUs[i], axis=1), linewidth=1, color=p[-1].get_color())
     plt.xlabel('epochs')
     plt.ylabel('IoU')
 
     # Set limits for y axis
-    # plt.ylim(0.55, 0.95)
+    #plt.ylim(0.55, 0.95)
 
     # Display legends and title
     plt.legend(loc=4)
@@ -425,7 +415,7 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
     # Customize the graph
     ax = fig.gca()
     ax.grid(linestyle='-.', which='both')
-    # ax.set_yticks(np.arange(0.8, 1.02, 0.02))
+    #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
 
     displayed_classes = [0, 1, 2, 3, 4, 5, 6, 7]
     displayed_classes = []
@@ -435,13 +425,12 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
             # Figure
             fig = plt.figure(c_name + ' IoU')
             for i, name in enumerate(list_of_names):
-                plt.plot(all_pred_epochs[i], all_class_IoUs[i][:, c_i],
-                         linewidth=1, label=name)
+                plt.plot(all_pred_epochs[i], all_class_IoUs[i][:, c_i], linewidth=1, label=name)
             plt.xlabel('epochs')
             plt.ylabel('IoU')
 
             # Set limits for y axis
-            # plt.ylim(0.8, 1)
+            #plt.ylim(0.8, 1)
 
             # Display legends and title
             plt.legend(loc=4)
@@ -449,13 +438,14 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
             # Customize the graph
             ax = fig.gca()
             ax.grid(linestyle='-.', which='both')
-            # ax.set_yticks(np.arange(0.8, 1.02, 0.02))
+            #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
 
     # Show all
     plt.show()
 
 
 def compare_convergences_classif(list_of_paths, list_of_labels=None):
+
     # Parameters
     # **********
 
@@ -474,6 +464,7 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
     all_vote_OA = []
     all_vote_confs = []
 
+
     for path in list_of_paths:
 
         # Load parameters
@@ -490,23 +481,19 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
         # Get validation confusions
         file = join(path, 'val_confs.txt')
         val_C1 = load_confusions(file, n_class)
-        val_PRE, val_REC, val_F1, val_IoU, val_ACC = smooth_metrics(val_C1,
-                                                                    smooth_n=smooth_n)
+        val_PRE, val_REC, val_F1, val_IoU, val_ACC = smooth_metrics(val_C1, smooth_n=smooth_n)
 
         # Get vote confusions
         file = join(path, 'vote_confs.txt')
         if exists(file):
             vote_C2 = load_confusions(file, n_class)
-            vote_PRE, vote_REC, vote_F1, vote_IoU, vote_ACC = smooth_metrics(
-                vote_C2, smooth_n=2)
+            vote_PRE, vote_REC, vote_F1, vote_IoU, vote_ACC = smooth_metrics(vote_C2, smooth_n=2)
         else:
             vote_C2 = val_C1
-            vote_PRE, vote_REC, vote_F1, vote_IoU, vote_ACC = (
-                val_PRE, val_REC, val_F1, val_IoU, val_ACC)
+            vote_PRE, vote_REC, vote_F1, vote_IoU, vote_ACC = (val_PRE, val_REC, val_F1, val_IoU, val_ACC)
 
         # Aggregate results
-        all_pred_epochs += [
-            np.array([i + first_e for i in range(len(val_ACC))])]
+        all_pred_epochs += [np.array([i+first_e for i in range(len(val_ACC))])]
         all_val_OA += [val_ACC]
         all_vote_OA += [vote_ACC]
         all_vote_confs += [vote_C2]
@@ -517,12 +504,12 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
     # ***********
 
     for i, label in enumerate(list_of_labels):
+
         print('\n' + label + '\n' + '*' * len(label) + '\n')
         print(list_of_paths[i])
 
         best_epoch = np.argmax(all_vote_OA[i])
-        print('Best Accuracy : {:.1f} % (epoch {:d})'.format(
-            100 * all_vote_OA[i][best_epoch], best_epoch))
+        print('Best Accuracy : {:.1f} % (epoch {:d})'.format(100 * all_vote_OA[i][best_epoch], best_epoch))
 
         confs = all_vote_confs[i]
 
@@ -536,14 +523,11 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
         """
 
         TP_plus_FN = np.sum(confs, axis=-1, keepdims=True)
-        class_avg_confs = confs.astype(np.float32) / TP_plus_FN.astype(
-            np.float32)
+        class_avg_confs = confs.astype(np.float32) / TP_plus_FN.astype(np.float32)
         diags = np.diagonal(class_avg_confs, axis1=-2, axis2=-1)
-        class_avg_ACC = np.sum(diags, axis=-1) / np.sum(class_avg_confs,
-                                                        axis=(-1, -2))
+        class_avg_ACC = np.sum(diags, axis=-1) / np.sum(class_avg_confs, axis=(-1, -2))
 
-        print('Corresponding mAcc : {:.1f} %'.format(
-            100 * class_avg_ACC[best_epoch]))
+        print('Corresponding mAcc : {:.1f} %'.format(100 * class_avg_ACC[best_epoch]))
 
     # Plots
     # *****
@@ -558,7 +542,7 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
         plt.ylabel(fig_name + ' Accuracy')
 
         # Set limits for y axis
-        # plt.ylim(0.55, 0.95)
+        #plt.ylim(0.55, 0.95)
 
         # Display legends and title
         plt.legend(loc=4)
@@ -566,9 +550,9 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
         # Customize the graph
         ax = fig.gca()
         ax.grid(linestyle='-.', which='both')
-        # ax.set_yticks(np.arange(0.8, 1.02, 0.02))
+        #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
 
-    # for i, label in enumerate(list_of_labels):
+    #for i, label in enumerate(list_of_labels):
     #    print(label, np.max(all_train_OA[i]), np.max(all_val_OA[i]))
 
     # Show all
@@ -576,6 +560,7 @@ def compare_convergences_classif(list_of_paths, list_of_labels=None):
 
 
 def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
+
     # Parameters
     # **********
 
@@ -597,15 +582,14 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
     config = Config()
     config.load(list_of_paths[0])
 
-    class_list = [dataset.label_to_names[label] for label in
-                  dataset.label_values
+    class_list = [dataset.label_to_names[label] for label in dataset.label_values
                   if label not in dataset.ignored_labels]
 
     s = '{:^6}|'.format('mean')
     for c in class_list:
         s += '{:^6}'.format(c[:4])
     print(s)
-    print(6 * '-' + '|' + 6 * config.num_classes * '-')
+    print(6*'-' + '|' + 6*config.num_classes*'-')
     for path in list_of_paths:
 
         # Get validation IoUs
@@ -619,8 +603,7 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
 
         # Get mean IoU
         val_class_IoUs, val_mIoUs = IoU_class_metrics(val_IoUs, smooth_n)
-        subpart_class_IoUs, subpart_mIoUs = IoU_class_metrics(subpart_IoUs,
-                                                              smooth_n)
+        subpart_class_IoUs, subpart_mIoUs = IoU_class_metrics(subpart_IoUs, smooth_n)
 
         # Aggregate results
         all_pred_epochs += [np.array([i for i in range(len(val_IoUs))])]
@@ -629,17 +612,17 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
         all_subpart_mIoUs += [subpart_mIoUs]
         all_subpart_class_IoUs += [subpart_class_IoUs]
 
-        s = '{:^6.1f}|'.format(100 * subpart_mIoUs[-1])
+        s = '{:^6.1f}|'.format(100*subpart_mIoUs[-1])
         for IoU in subpart_class_IoUs[-1]:
-            s += '{:^6.1f}'.format(100 * IoU)
+            s += '{:^6.1f}'.format(100*IoU)
         print(s)
 
-    print(6 * '-' + '|' + 6 * config.num_classes * '-')
+    print(6*'-' + '|' + 6*config.num_classes*'-')
     for snap_IoUs in all_val_class_IoUs:
         if len(snap_IoUs) > 0:
-            s = '{:^6.1f}|'.format(100 * np.mean(snap_IoUs[-1]))
+            s = '{:^6.1f}|'.format(100*np.mean(snap_IoUs[-1]))
             for IoU in snap_IoUs[-1]:
-                s += '{:^6.1f}'.format(100 * IoU)
+                s += '{:^6.1f}'.format(100*IoU)
         else:
             s = '{:^6s}'.format('-')
             for _ in range(config.num_classes):
@@ -652,15 +635,13 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
     # Figure
     fig = plt.figure('mIoUs')
     for i, name in enumerate(list_of_names):
-        p = plt.plot(all_pred_epochs[i], all_subpart_mIoUs[i], '--',
-                     linewidth=1, label=name)
-        plt.plot(all_pred_epochs[i], all_val_mIoUs[i], linewidth=1,
-                 color=p[-1].get_color())
+        p = plt.plot(all_pred_epochs[i], all_subpart_mIoUs[i], '--', linewidth=1, label=name)
+        plt.plot(all_pred_epochs[i], all_val_mIoUs[i], linewidth=1, color=p[-1].get_color())
     plt.xlabel('epochs')
     plt.ylabel('IoU')
 
     # Set limits for y axis
-    # plt.ylim(0.55, 0.95)
+    #plt.ylim(0.55, 0.95)
 
     # Display legends and title
     plt.legend(loc=4)
@@ -668,23 +649,22 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
     # Customize the graph
     ax = fig.gca()
     ax.grid(linestyle='-.', which='both')
-    # ax.set_yticks(np.arange(0.8, 1.02, 0.02))
+    #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
 
     displayed_classes = [0, 1, 2, 3, 4, 5, 6, 7]
-    # displayed_classes = []
+    #displayed_classes = []
     for c_i, c_name in enumerate(class_list):
         if c_i in displayed_classes:
 
             # Figure
             fig = plt.figure(c_name + ' IoU')
             for i, name in enumerate(list_of_names):
-                plt.plot(all_pred_epochs[i], all_val_class_IoUs[i][:, c_i],
-                         linewidth=1, label=name)
+                plt.plot(all_pred_epochs[i], all_val_class_IoUs[i][:, c_i], linewidth=1, label=name)
             plt.xlabel('epochs')
             plt.ylabel('IoU')
 
             # Set limits for y axis
-            # plt.ylim(0.8, 1)
+            #plt.ylim(0.8, 1)
 
             # Display legends and title
             plt.legend(loc=4)
@@ -692,7 +672,9 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
             # Customize the graph
             ax = fig.gca()
             ax.grid(linestyle='-.', which='both')
-            # ax.set_yticks(np.arange(0.8, 1.02, 0.02))
+            #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
+
+
 
     # Show all
     plt.show()
@@ -714,19 +696,53 @@ def experiment_name_1():
     """
 
     # Using the dates of the logs, you can easily gather consecutive ones. All logs should be of the same dataset.
-    start = 'Log_2021-05-06_00-00-00'
-    end = 'Log_2022-05-11_12-00-00'
+    start = 'Log_2020-04-22_11-52-58'
+    end = 'Log_2021-05-22_11-52-58'
 
     # Name of the result path
     res_path = 'results'
 
     # Gather logs and sort by date
-    logs = np.sort(
-        [join(res_path, l) for l in listdir(res_path) if start <= l <= end])
+    logs = np.sort([join(res_path, l) for l in listdir(res_path) if start <= l <= end])
 
     # Give names to the logs (for plot legends)
     logs_names = ['name_log_1',
-                  'name_log_2']
+                  'name_log_2',
+                  'name_log_3']
+
+    # safe check log names
+    logs_names = np.array(logs_names[:len(logs)])
+
+    return logs, logs_names
+
+
+def experiment_name_2():
+    """
+    In this function you choose the results you want to plot together, to compare them as an experiment.
+    Just return the list of log paths (like 'results/Log_2020-04-04_10-04-42' for example), and the associated names
+    of these logs.
+    Below an example of how to automatically gather all logs between two dates, and name them.
+    """
+
+    # Using the dates of the logs, you can easily gather consecutive ones. All logs should be of the same dataset.
+    start = 'Log_2020-04-22_11-52-58'
+    end = 'Log_2021-05-22_11-52-58'
+
+    # Name of the result path
+    res_path = 'results'
+
+    # Gather logs and sort by date
+    logs = np.sort([join(res_path, l) for l in listdir(res_path) if start <= l <= end])
+
+    # Optionally add a specific log at a specific place in the log list
+    logs = logs.astype('<U50')
+    logs = np.insert(logs, 0, 'results/Log_2020-04-04_10-04-42')
+
+    # Give names to the logs (for plot legends)
+    logs_names = ['name_log_inserted',
+                  'name_log_1',
+                  'name_log_2',
+                  'name_log_3']
 
     # safe check log names
     logs_names = np.array(logs_names[:len(logs)])
@@ -767,8 +783,7 @@ if __name__ == '__main__':
             if plot_dataset == this_dataset:
                 continue
             else:
-                raise ValueError(
-                    'All logs must share the same dataset to be compared')
+                raise ValueError('All logs must share the same dataset to be compared')
         else:
             plot_dataset = this_dataset
 
@@ -779,12 +794,12 @@ if __name__ == '__main__':
     if config.dataset_task == 'classification':
         compare_convergences_classif(logs, logs_names)
     elif config.dataset_task == 'cloud_segmentation':
-        if config.dataset.startswith('S3DIS') or config.dataset.startswith('ShapeNetPart'):
+        if config.dataset.startswith('S3DIS'):
             dataset = S3DISDataset(config, load_data=False)
             compare_convergences_segment(dataset, logs, logs_names)
-    # elif config.dataset_task == 'slam_segmentation':
-    #     if config.dataset.startswith('SemanticKitti'):
-    #         dataset = SemanticKittiDataset(config)
-    #         compare_convergences_SLAM(dataset, logs, logs_names)
+    elif config.dataset_task == 'slam_segmentation':
+        if config.dataset.startswith('SemanticKitti'):
+            dataset = SemanticKittiDataset(config)
+            compare_convergences_SLAM(dataset, logs, logs_names)
     else:
         raise ValueError('Unsupported dataset : ' + plot_dataset)
