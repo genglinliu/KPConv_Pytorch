@@ -295,7 +295,7 @@ class KPFCNN(nn.Module):
 
         self.head_mlp = UnaryBlock(out_dim, config.first_features_dim, False, 0)
         self.head_softmax = UnaryBlock(config.first_features_dim, self.C, False, 0)
-        self.softmax_layer = nn.LogSoftmax()
+        self.softmax_layer = nn.LogSoftmax(dim=-1)
 
         ################
         # Network Losses
@@ -308,10 +308,10 @@ class KPFCNN(nn.Module):
         if len(config.class_w) > 0:
             class_w = torch.from_numpy(np.array(config.class_w, dtype=np.float32))
             # self.criterion = torch.nn.CrossEntropyLoss(weight=class_w, ignore_index=-1)
-            self.criterion = torch.nn.KLDivLoss()
+            self.criterion = torch.nn.NLLLoss(weight=class_w, ignore_index=-1)
         else:
             # self.criterion = torch.nn.CrossEntropyLoss(ignore_index=-1)
-            self.criterion = torch.nn.KLDivLoss()
+            self.criterion = torch.nn.NLLLoss(ignore_index=-1)
         self.deform_fitting_mode = config.deform_fitting_mode
         self.deform_fitting_power = config.deform_fitting_power
         self.deform_lr_factor = config.deform_lr_factor
