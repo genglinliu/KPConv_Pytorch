@@ -1,0 +1,319 @@
+python=3
+numpy
+jupyter
+pytorch
+torchvision
+torchaudio
+cudatoolkit=11.0
+
+
+expectations for the final project
+we're doing cloud segmentation on S3DIS
+
+pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.1+cu110.html
+pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.7.1+cu110.html
+pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.7.1+cu110.html
+pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.1+cu110.html
+pip install torch-geometric
+
+-------------------------------
+experiments
+
+in_radius:
+
+default: titanx-long
+
+screen1(m40）, 0.5, max-epoch=10, epoch_steps=100 [16-26-27]
+
+screen2: 0.5 - fastest [log 01-01-15]
+screen3: 0.8 - [log 01-02-38]
+screen4: 1.0 - [log 01-04-57]
+screen5(2080ti): 1.2 - memory error
+screen6(m40): 1.5 - [log 02-38-34]
+
+
+-----------------------------------
+second round 
+
+screen2 (m40)
+screen3 (titanx)
+screen4 (titanx)
+
+change input thread
+
+
+
+
+
+
+KPFCNN(
+  (encoder_blocks): ModuleList(
+    (0): SimpleBlock(
+      (KPConv): KPConv(radius: 0.07, in_feat: 5, out_feat: 64)
+      (batch_norm): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (1): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 64, out_feat: 32, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.07, in_feat: 32, out_feat: 32)
+      (batch_norm_conv): BatchNormBlock(in_feat: 32, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 32, out_feat: 128, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 64, out_feat: 128, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (2): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 128, out_feat: 32, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.07, in_feat: 32, out_feat: 32)
+      (batch_norm_conv): BatchNormBlock(in_feat: 32, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 32, out_feat: 128, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (3): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 128, out_feat: 64, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.15, in_feat: 64, out_feat: 64)
+      (batch_norm_conv): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 64, out_feat: 256, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 128, out_feat: 256, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (4): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 256, out_feat: 64, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.15, in_feat: 64, out_feat: 64)
+      (batch_norm_conv): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 64, out_feat: 256, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (5): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 256, out_feat: 64, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.15, in_feat: 64, out_feat: 64)
+      (batch_norm_conv): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 64, out_feat: 256, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (6): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 256, out_feat: 128, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.30, in_feat: 128, out_feat: 128)
+      (batch_norm_conv): BatchNormBlock(in_feat: 128, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 128, out_feat: 512, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 256, out_feat: 512, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (7): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 512, out_feat: 128, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.30, in_feat: 128, out_feat: 128)
+      (batch_norm_conv): BatchNormBlock(in_feat: 128, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 128, out_feat: 512, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (8): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 512, out_feat: 128, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.30, in_feat: 128, out_feat: 128)
+      (batch_norm_conv): BatchNormBlock(in_feat: 128, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 128, out_feat: 512, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (9): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 512, out_feat: 256, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.60, in_feat: 256, out_feat: 256)
+      (batch_norm_conv): BatchNormBlock(in_feat: 256, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 256, out_feat: 1024, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 512, out_feat: 1024, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (10): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 1024, out_feat: 256, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.60, in_feat: 256, out_feat: 256)
+      (batch_norm_conv): BatchNormBlock(in_feat: 256, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 256, out_feat: 1024, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (11): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 1024, out_feat: 256, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.60, in_feat: 256, out_feat: 256)
+      (batch_norm_conv): BatchNormBlock(in_feat: 256, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 256, out_feat: 1024, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (12): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 1024, out_feat: 512, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 1.20, in_feat: 512, out_feat: 512)
+      (batch_norm_conv): BatchNormBlock(in_feat: 512, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 512, out_feat: 2048, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 1024, out_feat: 2048, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (13): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 2048, out_feat: 512, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 1.20, in_feat: 512, out_feat: 512)
+      (batch_norm_conv): BatchNormBlock(in_feat: 512, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 512, out_feat: 2048, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+  )
+  (decoder_blocks): ModuleList(
+    (0): NearestUpsampleBlock(layer: 4 -> 3)
+    (1): UnaryBlock(in_feat: 3072, out_feat: 1024, BN: True, ReLU: True)
+    (2): NearestUpsampleBlock(layer: 3 -> 2)
+    (3): UnaryBlock(in_feat: 1536, out_feat: 512, BN: True, ReLU: True)
+    (4): NearestUpsampleBlock(layer: 2 -> 1)
+    (5): UnaryBlock(in_feat: 768, out_feat: 256, BN: True, ReLU: True)
+    (6): NearestUpsampleBlock(layer: 1 -> 0)
+    (7): UnaryBlock(in_feat: 384, out_feat: 128, BN: True, ReLU: True)
+  )
+  (head_mlp): UnaryBlock(in_feat: 128, out_feat: 128, BN: False, ReLU: True)
+  (head_softmax): UnaryBlock(in_feat: 128, out_feat: 13, BN: False, ReLU: True)
+  (criterion): CrossEntropyLoss()
+  (l1): L1Loss()
+)
+
+*************************************
+
+KPFCNN(
+  (encoder_blocks): ModuleList(
+    (0): SimpleBlock(
+      (KPConv): KPConv(radius: 0.07, in_feat: 5, out_feat: 64)
+      (batch_norm): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (1): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 64, out_feat: 32, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.07, in_feat: 32, out_feat: 32)
+      (batch_norm_conv): BatchNormBlock(in_feat: 32, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 32, out_feat: 128, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 64, out_feat: 128, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (2): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 128, out_feat: 32, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.07, in_feat: 32, out_feat: 32)
+      (batch_norm_conv): BatchNormBlock(in_feat: 32, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 32, out_feat: 128, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (3): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 128, out_feat: 64, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.15, in_feat: 64, out_feat: 64)
+      (batch_norm_conv): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 64, out_feat: 256, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 128, out_feat: 256, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (4): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 256, out_feat: 64, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.15, in_feat: 64, out_feat: 64)
+      (batch_norm_conv): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 64, out_feat: 256, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (5): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 256, out_feat: 64, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.15, in_feat: 64, out_feat: 64)
+      (batch_norm_conv): BatchNormBlock(in_feat: 64, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 64, out_feat: 256, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (6): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 256, out_feat: 128, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.30, in_feat: 128, out_feat: 128)
+      (batch_norm_conv): BatchNormBlock(in_feat: 128, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 128, out_feat: 512, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 256, out_feat: 512, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (7): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 512, out_feat: 128, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.30, in_feat: 128, out_feat: 128)
+      (batch_norm_conv): BatchNormBlock(in_feat: 128, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 128, out_feat: 512, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (8): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 512, out_feat: 128, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.30, in_feat: 128, out_feat: 128)
+      (batch_norm_conv): BatchNormBlock(in_feat: 128, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 128, out_feat: 512, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (9): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 512, out_feat: 256, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.60, in_feat: 256, out_feat: 256)
+      (batch_norm_conv): BatchNormBlock(in_feat: 256, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 256, out_feat: 1024, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 512, out_feat: 1024, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (10): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 1024, out_feat: 256, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.60, in_feat: 256, out_feat: 256)
+      (batch_norm_conv): BatchNormBlock(in_feat: 256, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 256, out_feat: 1024, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (11): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 1024, out_feat: 256, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 0.60, in_feat: 256, out_feat: 256)
+      (batch_norm_conv): BatchNormBlock(in_feat: 256, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 256, out_feat: 1024, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (12): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 1024, out_feat: 512, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 1.20, in_feat: 512, out_feat: 512)
+      (batch_norm_conv): BatchNormBlock(in_feat: 512, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 512, out_feat: 2048, BN: True, ReLU: False)
+      (unary_shortcut): UnaryBlock(in_feat: 1024, out_feat: 2048, BN: True, ReLU: False)
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+    (13): ResnetBottleneckBlock(
+      (unary1): UnaryBlock(in_feat: 2048, out_feat: 512, BN: True, ReLU: True)
+      (KPConv): KPConv(radius: 1.20, in_feat: 512, out_feat: 512)
+      (batch_norm_conv): BatchNormBlock(in_feat: 512, momentum: 0.020, only_bias: False)
+      (unary2): UnaryBlock(in_feat: 512, out_feat: 2048, BN: True, ReLU: False)
+      (unary_shortcut): Identity()
+      (leaky_relu): LeakyReLU(negative_slope=0.1)
+    )
+  )
+  (decoder_blocks): ModuleList(
+    (0): NearestUpsampleBlock(layer: 4 -> 3)
+    (1): UnaryBlock(in_feat: 3072, out_feat: 1024, BN: True, ReLU: True)
+    (2): NearestUpsampleBlock(layer: 3 -> 2)
+    (3): UnaryBlock(in_feat: 1536, out_feat: 512, BN: True, ReLU: True)
+    (4): NearestUpsampleBlock(layer: 2 -> 1)
+    (5): UnaryBlock(in_feat: 768, out_feat: 256, BN: True, ReLU: True)
+    (6): NearestUpsampleBlock(layer: 1 -> 0)
+    (7): UnaryBlock(in_feat: 384, out_feat: 128, BN: True, ReLU: True)
+  )
+  (head_mlp): UnaryBlock(in_feat: 128, out_feat: 128, BN: False, ReLU: True)
+  (head_softmax): UnaryBlock(in_feat: 128, out_feat: 13, BN: False, ReLU: True)
+  (softmax_layer): LogSoftmax(dim=None)
+  (criterion): KLDivLoss()
+  (l1): L1Loss()
+)
+
+*************************************
+
+screen4: add dropout(0.1) to unary block - works without error but loss oscillates
+TODO: droput exp in 50 epochs and 400 steps each
+MultiLabelSoftMarginLoss() (ocsillating loss) 23-56-32
+MultiMarginLoss() - shape error
+log softmax + NLL (done) - same performance
+log softmax + KLDivergence (type error - not implemented for type 'long')
+Ablation study: taking off regularization loss (seems okay?) 00-15-22
+
+
+
