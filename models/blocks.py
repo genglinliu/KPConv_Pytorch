@@ -487,7 +487,7 @@ class UnaryBlock(nn.Module):
         self.batch_norm = BatchNormBlock(out_dim, self.use_bn, self.bn_momentum)
         if not no_relu:
             self.leaky_relu = nn.LeakyReLU(0.1)
-        self.dropout = nn.Dropout(p=0.1)
+        self.dropout = nn.Dropout(p=0.2)
         return
 
     def forward(self, x, batch=None):
